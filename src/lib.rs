@@ -6,10 +6,12 @@ fn run() -> Result<(), JsValue> {
     let document = window.document().expect("should have a document on window");
     let body = document.body().expect("document should have a body");
 
-    let el = document.create_element("main")?;
+    let main = document.create_element("main")?;
+    let el = document.create_element("p")?;
     el.set_text_content(Some("blorf"));
 
-    body.append_child(&el)?;
+    main.append_child(&el)?;
+    body.append_child(&main)?;
 
     Ok(())
 }

@@ -18,6 +18,10 @@ web-sys = { version = "0.3", features = [
     "Document",
     "Window",
     "Element",
+    "HtmlElement",
     "HtmlCanvasElement",
     "CanvasRenderingContext2d",
 ]}
+
+[profile.release]
+lto = true
