@@ -1,9 +1,9 @@
-import init, { run_web } from './blorf.js';
+import init, { web } from './blorf.js';
 
 (async () => {
   try {
     await init();
-    run_web();
+    web();
   } catch(e) {
     console.error(e);
   }

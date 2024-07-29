@@ -5,14 +5,30 @@ edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[[bin]]
+name = "blorf"
+path = "src/main.rs"
+
+[features]
+default = []
+webgl = ["wgpu/webgl"]
+webgpu = ["wgpu/webgpu"]
 
 [dependencies]
-console_error_panic_hook = "0.1.6"
-console_log = "1.0"
-wasm-bindgen = "0.2"
 wgpu = "22"
 winit = { version = "0.30.4", features = ["rwh_05"] }
 log = "0.4"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+env_logger = "0.11.5"
+pollster = "0.3.0"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "1.0"
+wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.30"
 web-sys = { version = "0.3", features = [
     "Document",
@@ -20,7 +36,6 @@ web-sys = { version = "0.3", features = [
     "Element",
     "HtmlElement",
     "HtmlCanvasElement",
-    "CanvasRenderingContext2d",
 ]}
 
 [profile.release]
