@@ -1,6 +1,4 @@
-#[cfg(target_arch = "wasm32")]
-#[allow(unused_imports)]
-use wasm_bindgen::{prelude::wasm_bindgen, throw_str, JsCast, UnwrapThrowExt};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, UnwrapThrowExt};
 use winit::{application::ApplicationHandler, event, event_loop::EventLoop};
 
 pub const CANVAS_ID: &str = "blorf";
@@ -38,13 +36,6 @@ pub async fn run() {
     #[cfg_attr(target_arch = "wasm32", allow(unused_variables))]
     let adapter = {
         let instance = wgpu::Instance::default();
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            log::info!("Available adapters:");
-            for a in instance.enumerate_adapters(wgpu::Backends::all()) {
-                log::info!("    {:?}", a.get_info())
-            }
-        }
         instance
             .request_adapter(&wgpu::RequestAdapterOptions::default())
             .await
@@ -58,23 +49,12 @@ pub async fn run() {
     event_loop.run_app(&mut app).unwrap_throw();
 }
 
-#[cfg(not(target_arch = "wasm32"))]
-pub fn native() {
-    env_logger::builder()
-        .filter(Some(module_path!()), log::LevelFilter::Info)
-        .parse_default_env()
-        .init();
-
-    pollster::block_on(run());
-}
-
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn web() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     console_log::init().expect("Could not initialize logger");
 
-    log::info!("Initiating wasm");
+    log::info!("Initiating wasm…");
 
     let window = web_sys::window().unwrap_throw();
     let document = window.document().unwrap_throw();
@@ -84,7 +64,7 @@ pub fn web() {
     canvas.set_attribute("width", "250").unwrap_throw();
     canvas.set_attribute("height", "250").unwrap_throw();
     canvas
-        .set_attribute("style", "background-color: green;")
+        .set_attribute("style", "background-color: black;")
         .unwrap_throw();
 
     let body = document.body().unwrap_throw();
