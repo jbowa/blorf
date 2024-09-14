@@ -5,6 +5,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 use wasm_bindgen::{prelude::wasm_bindgen, throw_str, UnwrapThrowExt};
 use web_sys::Element;
 use winit::{
+    application::ApplicationHandler,
     dpi::PhysicalSize,
     event::{ElementState, KeyEvent, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop, EventLoopProxy},
@@ -207,7 +208,7 @@ impl App {
     }
 }
 
-impl winit::application::ApplicationHandler<UserEvent> for App {
+impl ApplicationHandler<UserEvent> for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window_attrs = Window::default_attributes();
         let window = event_loop
@@ -242,7 +243,8 @@ impl winit::application::ApplicationHandler<UserEvent> for App {
 
     // Emitted when an event is sent from EventLoopProxy::send_event.
     fn user_event(&mut self, _: &ActiveEventLoop, event: UserEvent) {
-        let UserEvent::StateReady(state) = event;
+        let UserEvent::StateReady(mut state) = event;
+        state.state_ready = true;
         self.state = Some(state);
     }
 
