@@ -4,12 +4,7 @@ use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 use wasm_bindgen::{prelude::wasm_bindgen, throw_str, UnwrapThrowExt};
 use web_sys::Element;
-use wgpu::{
-    Backends, DeviceDescriptor, Features, Instance, InstanceDescriptor, Limits, PowerPreference,
-    RequestAdapterOptionsBase, Surface,
-};
 use winit::{
-    application::ApplicationHandler,
     dpi::PhysicalSize,
     event::{ElementState, KeyEvent, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop, EventLoopProxy},
@@ -27,7 +22,7 @@ struct State {
     device: wgpu::Device,
     queue: wgpu::Queue,
     size: PhysicalSize<u32>,
-    surface: Surface<'static>,
+    surface: wgpu::Surface<'static>,
     window: Arc<Window>,
     state_ready: bool,
     render_pipeline: wgpu::RenderPipeline,
@@ -39,19 +34,19 @@ impl State {
         size.width = size.width.max(1);
         size.height = size.height.max(1);
 
-        let instance_desc = InstanceDescriptor {
-            backends: Backends::BROWSER_WEBGPU,
+        let instance_desc = wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::BROWSER_WEBGPU,
             ..Default::default()
         };
-        let instance = Instance::new(instance_desc);
+        let instance = wgpu::Instance::new(instance_desc);
 
         let surface = instance
             .create_surface(window.clone())
             .unwrap_or_else(|e| throw_str(&format!("{e:#?}")));
 
         let adapter = instance
-            .request_adapter(&RequestAdapterOptionsBase {
-                power_preference: PowerPreference::default(),
+            .request_adapter(&wgpu::RequestAdapterOptionsBase {
+                power_preference: wgpu::PowerPreference::default(),
                 force_fallback_adapter: false,
                 compatible_surface: Some(&surface),
             })
@@ -61,12 +56,12 @@ impl State {
         // Create the logical device and queue command.
         let (device, queue) = adapter
             .request_device(
-                &DeviceDescriptor {
+                &wgpu::DeviceDescriptor {
                     label: None,
-                    required_features: Features::empty(),
+                    required_features: wgpu::Features::empty(),
                     // Make sure we use the texture resolution limits from the adapter,
                     // so we can support images the size of the swapchain.
-                    required_limits: Limits::downlevel_webgl2_defaults()
+                    required_limits: wgpu::Limits::downlevel_webgl2_defaults()
                         .using_resolution(adapter.limits()),
                     memory_hints: wgpu::MemoryHints::default(),
                 },
@@ -212,7 +207,7 @@ impl App {
     }
 }
 
-impl ApplicationHandler<UserEvent> for App {
+impl winit::application::ApplicationHandler<UserEvent> for App {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let window_attrs = Window::default_attributes();
         let window = event_loop
@@ -281,7 +276,7 @@ impl ApplicationHandler<UserEvent> for App {
                     },
                 ..
             } => {
-                // TODO:: log::info!("Exited!");
+                tracing::info!("Exited!");
                 event_loop.exit()
             }
             WindowEvent::Resized(new_size) => {
@@ -290,7 +285,7 @@ impl ApplicationHandler<UserEvent> for App {
             }
             WindowEvent::RedrawRequested => {
                 if !state.state_ready {
-                    // TODO: log::warn!("State was not ready!");
+                    tracing::warn!("State was not ready!");
                     return;
                 }
 
@@ -302,7 +297,7 @@ impl ApplicationHandler<UserEvent> for App {
                     // next frame. This happens when a frame takes too long to
                     // present.
                     Err(wgpu::SurfaceError::Timeout) => {
-                        // TODO:: log::warn!("Surface timeout!")
+                        tracing::warn!("Surface timeout!")
                     }
                     // Reconfigure the surface if it is lost or outdated
                     Err(wgpu::SurfaceError::Lost | wgpu::SurfaceError::Outdated) => {
@@ -311,7 +306,7 @@ impl ApplicationHandler<UserEvent> for App {
                     // The system is out of memory. We should gracefully exit
                     // the program.
                     Err(wgpu::SurfaceError::OutOfMemory) => {
-                        // TODO:: log::error!("System out of memory!");
+                        tracing::error!("System out of memory!");
                         event_loop.exit();
                     }
                 }
