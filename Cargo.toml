@@ -13,12 +13,12 @@ webgl = ["wgpu/webgl"]
 webgpu = ["wgpu/webgpu"]
 
 [dependencies]
+console_error_panic_hook = "0.1.6"
 wgpu = "22"
 winit = { version = "0.30.4", features = ["rwh_05"] }
-log = "0.4"
-
-console_error_panic_hook = "0.1.6"
-console_log = "1.0"
+tracing = "0.1"
+tracing-wasm = "0.2"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt"] }
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.30"
 web-sys = { version = "0.3", features = [
